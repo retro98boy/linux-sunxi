@@ -1,0 +1,36 @@
+#include "sun8i-t113s-bingpi-m2.dts"
+
+/ {
+	rgb_panel: rbg-panel {
+		#address-cells = <1>;
+		#size-cells = <0>;
+
+		port@0 {
+			#address-cells = <1>;
+			#size-cells = <0>;
+			reg = <0>;
+
+			rgb_panel_in: endpoint@0 {
+				reg = <0>;
+				remote-endpoint = <&tcon_lcd0_out_rgb>;
+			};
+		};
+	};
+};
+
+&de {
+	status = "okay";
+};
+
+&tcon_lcd0 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&lcd_rgb666_pins>;
+	status = "okay";
+};
+
+&tcon_lcd0_out {
+	tcon_lcd0_out_rgb: endpoint@0 {
+		reg = <0>;
+		remote-endpoint = <&rgb_panel_in>;
+	};
+};

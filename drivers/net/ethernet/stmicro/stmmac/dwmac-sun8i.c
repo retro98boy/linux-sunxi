@@ -69,6 +69,7 @@ struct emac_variant {
  * @mux_handle:	Internal pointer used by mdio-mux lib
  */
 struct sunxi_priv_data {
+	bool use_ephy_clk;
 	struct clk *ephy_clk;
 	struct regulator *regulator;
 	struct reset_control *rst_ephy;
@@ -1220,6 +1221,31 @@ static int sun8i_dwmac_probe(struct platform_device *pdev)
 		return ret;
 	}
 
+	if (!gmac->variant->soc_has_internal_phy) {
+		dev_info(dev, "soc has no internal phy\n");
+
+		gmac->use_ephy_clk =
+			of_property_read_bool(dev->of_node, "use-ephy-clk");
+
+		if (gmac->use_ephy_clk) {
+			dev_info(dev, "but still use ephy clk\n");
+
+			gmac->ephy_clk =
+				of_clk_get_by_name(dev->of_node, "ephy");
+			if (unlikely(IS_ERR_OR_NULL(gmac->ephy_clk))) {
+				dev_err(dev, "fialed to get ephy clk\n");
+				ret = -EINVAL;
+			}
+
+			ret = clk_prepare_enable(gmac->ephy_clk);
+			if (ret < 0) {
+				dev_err(dev, "failed to enable ephy clk\n");
+				clk_put(gmac->ephy_clk);
+				return -EIO;
+			}
+		}
+	}
+
 	ret = of_get_phy_mode(dev->of_node, &interface);
 	if (ret)
 		return -EINVAL;
@@ -1306,6 +1332,11 @@ static void sun8i_dwmac_remove(struct platform_device *pdev)
 	struct net_device *ndev = platform_get_drvdata(pdev);
 	struct stmmac_priv *priv = netdev_priv(ndev);
 	struct sunxi_priv_data *gmac = priv->plat->bsp_priv;
+
+	if ((!gmac->variant->soc_has_internal_phy) && gmac->use_ephy_clk) {
+		clk_disable_unprepare(gmac->ephy_clk);
+		clk_put(gmac->ephy_clk);
+	}
 
 	if (gmac->variant->soc_has_internal_phy) {
 		mdio_mux_uninit(gmac->mux_handle);

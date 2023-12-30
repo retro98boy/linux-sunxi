@@ -1,0 +1,16 @@
+#include "sun8i-t113s-bingpi-m2-with-rgb-panel.dtsi"
+
+&rgb_panel {
+	compatible = "avic,tm070ddh03";
+};
+
+&i2c2 {
+	gt911@14 {
+		compatible = "goodix,gt911";
+		reg = <0x14>;
+		interrupt-parent = <&pio>;
+		interrupts = <3 22 IRQ_TYPE_EDGE_FALLING>;
+		irq-gpios = <&pio 3 22 GPIO_ACTIVE_HIGH>;
+		reset-gpios = <&pio 6 10 GPIO_ACTIVE_HIGH>;
+	};
+};
