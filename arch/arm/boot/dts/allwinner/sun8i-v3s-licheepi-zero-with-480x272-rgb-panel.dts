@@ -1,0 +1,5 @@
+#include "sun8i-v3s-licheepi-zero-with-rgb-panel.dtsi"
+
+&rgb_panel {
+	compatible = "qiaodian,qd43003c0-40";
+};

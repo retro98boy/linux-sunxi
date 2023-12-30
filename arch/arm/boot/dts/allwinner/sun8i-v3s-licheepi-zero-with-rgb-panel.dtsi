@@ -1,0 +1,66 @@
+#include "sun8i-v3s-licheepi-zero.dts"
+
+ / {
+	backlight: backlight {
+		compatible = "pwm-backlight";
+		pwms = <&pwm 0 1000000 0>;
+		brightness-levels = <0 4 8 16 32 64 128 255>;
+		default-brightness-level = <7>;
+	};
+
+	rgb_panel: rgb-panel {
+		#address-cells = <1>;
+		#size-cells = <0>;
+		backlight = <&backlight>;
+
+		port@0 {
+			reg = <0>;
+			#address-cells = <1>;
+			#size-cells = <0>;
+
+			rgb_panel_in: endpoint@0 {
+				reg = <0>;
+				remote-endpoint = <&tcon0_out_rgb_panel>;
+			};
+		};
+	};
+};
+
+&de {
+	status = "okay";
+};
+
+&tcon0 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&rgb666_pe_pins>;
+	status = "okay";
+};
+
+&tcon0_out {
+	tcon0_out_rgb_panel: endpoint@0 {
+		reg = <0>;
+		remote-endpoint = <&rgb_panel_in>;
+	};
+};
+
+&pwm {
+	pinctrl-names = "default";
+	pinctrl-0 = <&pwm0_pb_pins>;
+	status = "okay";
+};
+
+&pio {
+	rgb666_pe_pins: rgb666-pe-pins {
+		pins = "PE0", "PE1", "PE2", "PE3", "PE4",
+						"PE5", "PE6", "PE7", "PE8", "PE9",
+						"PE10", "PE11", "PE12", "PE13", "PE14",
+						"PE15", "PE16", "PE17", "PE18", "PE19", "PE23", "PE24";
+		function = "lcd";
+	};
+
+	// 面板供电由PB4控制，可以将PB4作为GPIO控制面板常开或常闭，也可以将PB4复用成PWM0来进行PWM调光
+	pwm0_pb_pins: pwm0-pb-pins {
+		pins = "PB4";
+		function = "pwm0";
+	};
+};

@@ -75,6 +75,25 @@
 			gpios = <&pio 6 2 GPIO_ACTIVE_LOW>; /* PG2 */
 		};
 	};
+
+	ehci0: usb@1c1a000 {
+		compatible = "allwinner,sun8i-v3s-ehci", "generic-ehci";
+		reg = <0x01c1a000 0x100>;
+		interrupts = <GIC_SPI 72 IRQ_TYPE_LEVEL_HIGH>;
+		clocks = <&ccu CLK_BUS_EHCI0>, <&ccu CLK_BUS_OHCI0>;
+		resets = <&ccu RST_BUS_EHCI0>, <&ccu RST_BUS_OHCI0>;
+		status = "okay";
+	};
+
+	ohci0: usb@1c1a400 {
+		compatible = "allwinner,sun8i-v3s-ohci", "generic-ohci";
+		reg = <0x01c1a400 0x100>;
+		interrupts = <GIC_SPI 73 IRQ_TYPE_LEVEL_HIGH>;
+		clocks = <&ccu CLK_BUS_EHCI0>, <&ccu CLK_BUS_OHCI0>,
+			 <&ccu CLK_USB_OHCI0>;
+		resets = <&ccu RST_BUS_EHCI0>, <&ccu RST_BUS_OHCI0>;
+		status = "okay";
+	};
 };
 
 &mmc0 {
@@ -97,5 +116,14 @@
 
 &usbphy {
 	usb0_id_det-gpios = <&pio 5 6 GPIO_ACTIVE_HIGH>;
+	status = "okay";
+};
+
+&codec {
+	allwinner,audio-routing =
+		"Headphone", "HP",
+		"Headphone", "HPCOM",
+		"Mic", "HBIAS",
+		"MIC1", "Mic";
 	status = "okay";
 };
